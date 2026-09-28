@@ -14,7 +14,7 @@ Estudante Finalista de Informática na Universidade Pedagógica de Maputo (Minor
 Procuro oportunidades de estágio ou posição júnior em TI para aplicar e desenvolver as minhas competências.
 
 **Projetos**
-ChatTime — Sistema de Chat em Tempo Real
+ChatTime : Sistema de Chat em Tempo Real
 Sistema de mensagens instantâneas desenvolvido com Node.js e Socket.io, com autenticação de utilizadores, base de dados SQL e envio de emails.
 
 **Tecnologias:** Node.js, Socket.io, JavaScript, HTML, CSS, SQL
