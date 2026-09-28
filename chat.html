@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ChatApp - Conversas</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #0f172a;
+  height: 100vh;
+  display: flex;
+  color: white;
+  overflow: hidden;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: 300px;
+  background: #111827;
+  border-right: 1px solid #1f2937;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.topMenu {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.menuBtn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #1f2937;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+.menuBtn.active {
+  background: #3b82f6;
+}
+
+.user-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #1f2937;
+  position: relative;
+}
+
+.user:hover {
+  background: #374151;
+}
+
+.user-unread {
+  background: #1e3a5f;
+  border-left: 3px solid #3b82f6;
+}
+
+.unread-badge {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.user-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.user-action-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.user-action-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* ========== TELA DE CONVERSA ========== */
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0f172a;
+}
+
+.chatHeader {
+  min-height: 65px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #111827;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.headerLeft h3 {
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerIcons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #1f2937;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 18px;
+}
+
+.iconBtn:hover {
+  background: #3b82f6;
+}
+
+.menu-dots {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #1f2937;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-menu {
+  display: none;
+  position: fixed;
+  right: 10px;
+  top: 70px;
+  background: #1f2937;
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 300;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background: #374151;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  line-height: 1.4;
+  word-break: break-word;
+  position: relative;
+}
+
+.message:hover .message-actions {
+  display: flex;
+}
+
+.message-actions {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: none;
+  gap: 5px;
+  background: #1f2937;
+  border-radius: 8px;
+  padding: 5px;
+  z-index: 10;
+}
+
+.message-action-btn {
+  background: #374151;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.message-action-btn:hover {
+  background: #ef4444;
+}
+
+.message small {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.message-deleted {
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.other {
+  background: #1e293b;
+  align-self: flex-start;
+}
+
+.me {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  align-self: flex-end;
+}
+
+.file-message {
+  background: #1f2937;
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 6px;
+}
+
+.file-message a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.inputArea {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background: #111827;
+  align-items: center;
+  border-top: 1px solid #1f2937;
+  flex-shrink: 0;
+}
+
+.file-input-label {
+  width: 45px;
+  height: 45px;
+  background: #1f2937;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: 0.3s;
+}
+
+.file-input-label:hover {
+  background: #3b82f6;
+}
+
+#fileInput {
+  display: none;
+}
+
+#msgInput {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 12px;
+  background: #1f2937;
+  color: white;
+  font-size: 15px;
+  outline: none;
+}
+
+#msgInput:focus {
+  outline: none;
+  border: 1px solid #3b82f6;
+}
+
+.sendBtn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.sendBtn:hover {
+  opacity: 0.9;
+}
+
+.empty {
+  margin: auto;
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+}
+
+.back-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #1f2937;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Context Menu */
+.context-menu {
+  position: fixed;
+  background: #1f2937;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  display: none;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.context-menu button:hover {
+  background: #374151;
+}
+
+.context-menu .danger:hover {
+  background: #ef4444;
+}
+
+.admin-badge {
+  background: #fbbf24;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+/* ========== VERSÃO MOBILE ========== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.hide {
+    transform: translateX(-100%);
+  }
+  
+  .chat {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    background: #0f172a;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .chat.show {
+    transform: translateX(0);
+  }
+  
+  .back-btn {
+    display: flex;
+  }
+  
+  .headerIcons {
+    display: none;
+  }
+  
+  .menu-dots {
+    display: flex;
+  }
+  
+  .headerLeft {
+    gap: 8px;
+  }
+  
+  .messages {
+    padding: 12px;
+    padding-bottom: 70px;
+  }
+  
+  .message {
+    max-width: 85%;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .inputArea {
+    padding: 10px 12px;
+  }
+  
+  #msgInput {
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .sendBtn {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+  
+  .file-input-label {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+  
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* MODAIS */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  width: 400px;
+  max-width: 90%;
+  background: #111827;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #1f2937;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalAvatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: auto;
+  margin-bottom: 15px;
+  background: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 50%;
+}
+
+.closeBtn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.closeBtn:hover {
+  background: #2563eb;
+}
+
+.member-item {
+  padding: 10px;
+  margin: 8px 0;
+  background: #1f2937;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.member-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.member-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 15px 0;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.btn-secondary {
+  background: #374151;
+  color: white;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+input, textarea, select {
+  background: #1f2937;
+  color: white;
+  border: 1px solid #374151;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+#groupName {
+  margin: 10px 0;
+}
+
+h3 {
+  color: #3b82f6;
+  font-size: 18px;
+}
+
+h4 {
+  margin: 15px 0 5px 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.group-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  color: white;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.photo-action-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  background: #374151;
+  color: white;
+  transition: 0.2s;
+}
+
+.photo-action-btn:hover {
+  background: #3b82f6;
+}
+
+.delete-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.delete-options button {
+  flex: 1;
+}
+
+.warning-text {
+  color: #ef4444;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.profile-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #374151;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="topMenu">
+    <button class="menuBtn active" id="chatTab" onclick="showChats()">💬 Chats</button>
+    <button class="menuBtn" id="groupTab" onclick="showGroups()">👥 Grupos</button>
+  </div>
+  <div id="userList" class="user-list"></div>
+</div>
+
+<div class="chat" id="chatScreen">
+  <div class="chatHeader">
+    <div class="headerLeft" id="headerLeft" onclick="openChatInfo()">
+      <button class="back-btn" id="backBtn" onclick="closeConversation()">←</button>
+      <div class="avatar" id="chatAvatar"></div>
+      <h3 id="chatName">Selecione uma conversa</h3>
+    </div>
+    <div class="headerIcons">
+      <button class="iconBtn" onclick="createGroup()" title="Criar Grupo">👥</button>
+      <button class="iconBtn" onclick="viewMembers()" title="Ver Membros">📋</button>
+      <button class="iconBtn" onclick="addMemberToGroup()" title="Adicionar Membro">➕</button>
+      <button class="iconBtn" onclick="openMyProfile()" title="Meu Perfil">👤</button>
+      <button class="iconBtn" onclick="deleteConversation()" title="Deletar Conversa">🗑️</button>
+      <button class="iconBtn" onclick="logout()" title="Sair">🚪</button>
+      <button class="iconBtn" onclick="leaveGroup()" title="Sair do Grupo">👋</button>
+    </div>
+    <button class="menu-dots" id="menuDotsBtn" onclick="toggleDropdownMenu()">⋮</button>
+  </div>
+  <div class="dropdown-menu" id="dropdownMenu">
+    <button onclick="createGroup()">👥 Criar Grupo</button>
+    <button onclick="viewMembers()">📋 Ver Membros</button>
+    <button onclick="addMemberToGroup()">➕ Adicionar Membro</button>
+    <button onclick="openMyProfile()">👤 Meu Perfil</button>
+    <button onclick="deleteConversation()">🗑️ Apagar Conversa</button>
+    <button onclick="leaveGroup()">👋 Sair do Grupo</button>
+    <button onclick="logout()">🚪 Sair</button>
+  </div>
+  <div class="messages" id="messages">
+    <div class="empty"><h1>💬</h1><p>Escolha alguém para conversar</p></div>
+  </div>
+  <div class="inputArea">
+    <div class="file-input-wrapper">
+      <label class="file-input-label" title="Enviar arquivo">📎<input type="file" id="fileInput" onchange="sendFile()"></label>
+    </div>
+    <input id="msgInput" placeholder="Digite sua mensagem...">
+    <button class="sendBtn" onclick="sendMessage()">Enviar</button>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div class="context-menu" id="contextMenu">
+  <button onclick="showDeleteOptions()">🗑️ Apagar Mensagem</button>
+</div>
+
+<!-- Modal de opções de apagar mensagem -->
+<div class="modal" id="deleteMessageModal">
+  <div class="modalContent">
+    <h3>🗑️ Apagar Mensagem</h3>
+    <p>Como deseja apagar esta mensagem?</p>
+    <div class="delete-options">
+      <button class="btn-primary" onclick="deleteForMe()">Apagar para mim</button>
+      <button class="btn-danger" onclick="deleteForEveryone()">Apagar para todos</button>
+    </div>
+    <button class="btn-secondary" onclick="closeDeleteModal()" style="margin-top: 10px;">Cancelar</button>
+  </div>
+</div>
+
+<audio id="notificationSound" preload="auto"><source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg"></audio>
+
+<!-- PERFIL MODAL (com opção de apagar conta) -->
+<div class="modal" id="profileModal">
+  <div class="modalContent">
+    <div class="modalAvatar" id="profileAvatar" onclick="uploadProfilePhoto()">
+      <div class="avatar-upload-overlay">📷<br><span>Clique para alterar</span></div>
+    </div>
+    <h2 id="profileName"></h2>
+    <p id="profileEmail"></p>
+    <div class="photo-actions">
+      <button class="photo-action-btn" onclick="removeProfilePhoto()">Remover Foto</button>
+    </div>
+    <div class="profile-section">
+      <button class="photo-action-btn" style="background: #ef4444; width: 100%;" onclick="openDeleteAccountModal()">⚠️ Apagar Minha Conta</button>
+    </div>
+    <input type="file" id="profilePhotoInput" style="display:none" accept="image/*" onchange="updateProfilePhoto()">
+    <button class="closeBtn" onclick="closeProfile()">Fechar</button>
+  </div>
+</div>
+
+<!-- Modal de apagar conta -->
+<div class="modal" id="deleteAccountModal">
+  <div class="modalContent">
+    <h3 style="color: #ef4444;">⚠️ Apagar Conta</h3>
+    <p>Tem certeza que deseja apagar sua conta?</p>
+    <p class="warning-text">Esta ação é irreversível! Todas as suas mensagens, grupos e dados serão perdidos permanentemente.</p>
+    <p>Digite sua senha para confirmar:</p>
+    <input type="password" id="deletePassword" placeholder="Sua senha">
+    <div class="modal-buttons" style="margin-top: 20px;">
+      <button class="btn-secondary" onclick="closeDeleteAccountModal()">Cancelar</button>
+      <button class="btn-danger" onclick="confirmDeleteAccount()">Apagar minha conta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="userProfileModal"><div class="modalContent"><div class="modalAvatar" id="userProfileAvatar"></div><h2 id="userProfileName"></h2><p id="userProfileEmail"></p><button class="closeBtn" onclick="closeUserProfile()">Fechar</button></div></div>
+
+<div class="modal" id="editGroupPhotoModal"><div class="modalContent"><h3>📸 Editar Foto do Grupo</h3><div class="modalAvatar" id="editGroupAvatar" onclick="uploadEditGroupPhoto()"><div class="avatar-upload-overlay">📷<br><span>Clique para alterar</span></div></div><div class="photo-actions"><button class="photo-action-btn" onclick="removeGroupPhoto()">Remover Foto</button></div><input type="file" id="editGroupPhotoInput" style="display:none" accept="image/*" onchange="updateGroupPhoto()"><div class="modal-buttons"><button class="btn-secondary" onclick="closeEditGroupPhotoModal()">Cancelar</button><button class="btn-primary" onclick="saveGroupPhoto()">Salvar</button></div></div></div>
+
+<div class="modal" id="groupModal"><div class="modalContent"><h3>✨ Criar Novo Grupo</h3><input type="text" id="groupName" placeholder="Nome do grupo"><div class="modalAvatar" style="margin:10px auto" onclick="uploadGroupPhoto()"><div id="groupPhotoPreview">👥</div><div class="avatar-upload-overlay">📷</div></div><input type="file" id="groupPhotoInput" style="display:none" accept="image/*" onchange="previewGroupPhoto()"><h4>👥 Selecione os participantes:</h4><div id="membersList" class="member-list"></div><div class="modal-buttons"><button class="btn-secondary" onclick="closeGroupModal()">Cancelar</button><button class="btn-primary" onclick="saveGroup()">Criar Grupo</button></div></div></div>
+
+<div class="modal" id="addMemberModal"><div class="modalContent"><h3>➕ Adicionar Membro ao Grupo</h3><input type="text" id="searchMemberInput" class="search-input" placeholder="🔍 Buscar usuário..." onkeyup="filterAddMembers()"><div id="addMembersList" class="member-list"></div><div class="modal-buttons"><button class="btn-secondary" onclick="closeAddMemberModal()">Cancelar</button><button class="btn-primary" onclick="confirmAddMembers()">Adicionar</button></div></div></div>
+
+<div class="modal" id="membersModal"><div class="modalContent"><h3>👥 Membros do Grupo</h3><div id="groupMembersList"></div><button class="closeBtn" onclick="closeMembersModal()">Fechar</button></div></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// URL do servidor
+const SERVER_URL = 'https://unfixable-quicksand-sprawl.ngrok-free.dev';
+const API_URL = SERVER_URL + '/api';
+const SOCKET_URL = SERVER_URL;
+
+let currentUser = null;
+let users = [];
+let selectedUser = null;
+let selectedGroup = null;
+let socket = null;
+let groups = [];
+let groupPhotoData = null;
+let tempGroupPhoto = null;
+let lastMessageId = 0;
+let selectedMessageId = null;
+let selectedMessage = null;
+let currentGroupData = null;
+
+// Controle de notificações
+let unreadMessages = {};
+let originalTitle = document.title;
+let notificationSound = null;
+
+// ========== FUNÇÕES DE TELA ==========
+function openConversation() {
+  const sidebar = document.getElementById('sidebar');
+  const chatScreen = document.getElementById('chatScreen');
+  
+  if (window.innerWidth <= 768) {
+    sidebar.classList.add('hide');
+    chatScreen.classList.add('show');
+  }
+}
+
+function closeConversation() {
+  const sidebar = document.getElementById('sidebar');
+  const chatScreen = document.getElementById('chatScreen');
+  
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove('hide');
+    chatScreen.classList.remove('show');
+    closeDropdownMenu();
+  }
+  
+  selectedUser = null;
+  selectedGroup = null;
+  document.getElementById('chatName').textContent = 'Selecione uma conversa';
+  document.getElementById('chatAvatar').innerHTML = '';
+}
+
+function updateConversationHeader(name, avatarUrl) {
+  document.getElementById('chatName').textContent = name;
+  const avatarDiv = document.getElementById('chatAvatar');
+  avatarDiv.innerHTML = avatarUrl ? `<img src="${avatarUrl}">` : (name.charAt(0).toUpperCase() || '👥');
+}
+
+// ========== MENU DROPDOWN ==========
+function toggleDropdownMenu() {
+  const menu = document.getElementById('dropdownMenu');
+  menu.classList.toggle('show');
+}
+
+function closeDropdownMenu() {
+  const menu = document.getElementById('dropdownMenu');
+  menu.classList.remove('show');
+}
+
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('dropdownMenu');
+  const dotsBtn = document.getElementById('menuDotsBtn');
+  if (menu && !menu.contains(event.target) && !dotsBtn.contains(event.target)) {
+    menu.classList.remove('show');
+  }
+});
+
+// ========== APAGAR CONTA ==========
+function openDeleteAccountModal() {
+  closeProfile();
+  document.getElementById('deletePassword').value = '';
+  document.getElementById('deleteAccountModal').style.display = 'flex';
+}
+
+function closeDeleteAccountModal() {
+  document.getElementById('deleteAccountModal').style.display = 'none';
+}
+
+async function confirmDeleteAccount() {
+  const password = document.getElementById('deletePassword').value.trim();
+  
+  if (!password) {
+    alert('Digite sua senha para confirmar a exclusão da conta');
+    return;
+  }
+  
+  if (!confirm('⚠️ ATENÇÃO: Esta ação é irreversível! Todos os seus dados serão perdidos. Tem certeza que deseja apagar sua conta permanentemente?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/delete-account`, {
+      method: 'DELETE',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ 
+        userId: currentUser.id,
+        password: password 
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('✅ Sua conta foi apagada com sucesso!');
+      localStorage.clear();
+      if (socket) socket.disconnect();
+      window.location.href = 'login.html';
+    } else {
+      alert(data.message || 'Erro ao apagar conta. Verifique sua senha.');
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro de conexão ao apagar conta');
+  }
+}
+
+// ========== APAGAR MENSAGEM ==========
+function showDeleteOptions() {
+  if (!selectedMessageId) return;
+  document.getElementById('deleteMessageModal').style.display = 'flex';
+  document.getElementById('contextMenu').style.display = 'none';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  selectedMessageId = null;
+}
+
+async function deleteForMe() {
+  await deleteMessage(selectedMessageId, 'me');
+  closeDeleteModal();
+}
+
+async function deleteForEveryone() {
+  if (!confirm('⚠️ Esta mensagem será apagada para TODOS os participantes. Tem certeza?')) return;
+  await deleteMessage(selectedMessageId, 'everyone');
+  closeDeleteModal();
+}
+
+async function deleteMessage(messageId, type) {
+  try {
+    const response = await fetch(`${API_URL}/messages/${messageId}`, {
+      method: 'DELETE',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+      },
+      body: JSON.stringify({ delete_type: type })
+    });
+    
+    if (response.ok) {
+      const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
+      if (messageElement) {
+        if (type === 'me') {
+          messageElement.remove();
+        } else {
+          messageElement.innerHTML = '<i>Mensagem apagada</i>';
+          messageElement.classList.add('message-deleted');
+        }
+      }
+      
+      const container = document.getElementById('messages');
+      if (container.children.length === 0 || (container.children.length === 1 && container.children[0].classList?.contains('message-deleted'))) {
+        container.innerHTML = '<div class="empty"><h1>💬</h1><p>Nenhuma mensagem ainda. Envie uma mensagem!</p></div>';
+      }
+      
+      selectedMessageId = null;
+    } else {
+      alert('Erro ao apagar mensagem');
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao apagar mensagem');
+  }
+}
+
+function showContextMenu(event, messageId, message) {
+  event.preventDefault();
+  selectedMessageId = messageId;
+  selectedMessage = message;
+  const contextMenu = document.getElementById('contextMenu');
+  contextMenu.style.display = 'block';
+  contextMenu.style.left = event.pageX + 'px';
+  contextMenu.style.top = event.pageY + 'px';
+}
+
+document.addEventListener('click', function() {
+  const contextMenu = document.getElementById('contextMenu');
+  contextMenu.style.display = 'none';
+});
+
+// ========== NOTIFICAÇÕES ==========
+function initNotifications() {
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    notificationSound = document.getElementById('notificationSound');
+    if (notificationSound) notificationSound.volume = 0.3;
+}
+
+function playNotificationSound() { if (notificationSound) notificationSound.play().catch(e => console.log); }
+
+function showBrowserNotification(senderName, message) {
+    if (Notification.permission === 'granted' && document.hidden) {
+        new Notification(`📨 Mensagem de ${senderName}`, { body: message.length > 50 ? message.substring(0,50)+'...' : message, icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png' });
+    }
+}
+
+let blinkInterval = null;
+function startBlinkingTitle() {
+    if (blinkInterval) clearInterval(blinkInterval);
+    let isOriginal = true;
+    blinkInterval = setInterval(() => { document.title = isOriginal ? '🔔 NOVA MENSAGEM! 🔔' : originalTitle; isOriginal = !isOriginal; }, 800);
+}
+
+function stopBlinkingTitle() { if (blinkInterval) { clearInterval(blinkInterval); blinkInterval = null; } document.title = originalTitle; }
+
+function addUnreadBadge(userId) {
+    if (!unreadMessages[userId]) unreadMessages[userId] = 0;
+    unreadMessages[userId]++;
+    const el = document.querySelector(`.user[data-user-id="${userId}"]`);
+    if (el) {
+        let badge = el.querySelector('.unread-badge');
+        if (!badge) { badge = document.createElement('div'); badge.className = 'unread-badge'; el.appendChild(badge); }
+        badge.textContent = unreadMessages[userId];
+        el.classList.add('user-unread');
+    }
+}
+
+function clearUnreadBadge(userId) {
+    delete unreadMessages[userId];
+    const el = document.querySelector(`.user[data-user-id="${userId}"]`);
+    if (el) { const badge = el.querySelector('.unread-badge'); if (badge) badge.remove(); el.classList.remove('user-unread'); }
+}
+
+function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+// ========== MENSAGENS ==========
+function addMessageToChat(message) {
+  if (!message || message.id === lastMessageId) return;
+  
+  const container = document.getElementById('messages');
+  if (container.querySelector('.empty')) container.innerHTML = '';
+  
+  if (document.querySelector(`.message[data-message-id="${message.id}"]`)) return;
+  
+  lastMessageId = message.id;
+  
+  const div = document.createElement('div');
+  div.className = `message ${message.sender_id === currentUser.id ? 'me' : 'other'}`;
+  div.setAttribute('data-message-id', message.id);
+  div.oncontextmenu = (e) => showContextMenu(e, message.id, message);
+  
+  let content = '';
+  if (selectedGroup && message.sender_id !== currentUser.id) {
+    content = `<b>${escapeHtml(message.sender_name || 'Alguém')}</b><br>`;
+  }
+  if (message.is_deleted) {
+    content = '<i>Mensagem apagada</i>';
+    div.classList.add('message-deleted');
+  } else {
+    if (message.file_url) {
+      if (message.file_type && message.file_type.startsWith('image/')) {
+        content += `<img src="${message.file_url}" style="max-width:150px;border-radius:8px;cursor:pointer" onclick="window.open('${message.file_url}','_blank')">`;
+      } else {
+        content += `<div class="file-message"><a href="${message.file_url}" target="_blank">📎 ${message.file_name || 'Arquivo'}</a></div>`;
+      }
+    }
+    if (message.message && !message.message.startsWith('📎')) content += escapeHtml(message.message);
+    content += `<small>${new Date(message.created_at).toLocaleTimeString()}</small>`;
+  }
+  div.innerHTML = content;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!selectedUser && !selectedGroup) {
+    alert('Selecione uma conversa primeiro!');
+    return;
+  }
+  
+  input.value = '';
+  
+  try {
+    if (selectedGroup) {
+      const response = await fetch(`${API_URL}/groups/${selectedGroup.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ sender_id: currentUser.id, message: text })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (socket && socket.connected) {
+          socket.emit('nova_mensagem_grupo', data);
+        }
+        await loadGroupMessages(selectedGroup.id);
+      }
+    } else if (selectedUser) {
+      const response = await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ sender_id: currentUser.id, receiver_id: selectedUser.id, message: text })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (socket && socket.connected) {
+          socket.emit('nova_mensagem', data);
+        }
+        await loadMessages();
+      }
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao enviar mensagem');
+  }
+}
+
+// ========== GRUPOS ==========
+async function createGroup() {
+  closeDropdownMenu();
+  const membersDiv = document.getElementById('membersList');
+  membersDiv.innerHTML = '';
+  const availableUsers = users.filter(u => u.username !== 'teste_direto');
+  if (availableUsers.length === 0) { membersDiv.innerHTML = '<div class="empty">Nenhum usuário disponível</div>'; return; }
+  availableUsers.forEach(user => {
+    const div = document.createElement('div');
+    div.className = 'member-item';
+    div.innerHTML = `<input type="checkbox" value="${user.id}" id="member_${user.id}"><label for="member_${user.id}"><strong>${escapeHtml(user.username)}</strong></label>`;
+    membersDiv.appendChild(div);
+  });
+  document.getElementById('groupModal').style.display = 'flex';
+  document.getElementById('groupName').value = '';
+  groupPhotoData = null;
+  document.getElementById('groupPhotoPreview').innerHTML = '👥';
+}
+
+function closeGroupModal() { document.getElementById('groupModal').style.display = 'none'; }
+
+function uploadGroupPhoto() { document.getElementById('groupPhotoInput').click(); }
+
+function previewGroupPhoto() {
+  const file = document.getElementById('groupPhotoInput').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => { groupPhotoData = e.target.result; document.getElementById('groupPhotoPreview').innerHTML = `<img src="${groupPhotoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`; };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveGroup() {
+  const name = document.getElementById('groupName').value.trim();
+  if (!name) { alert('Digite um nome para o grupo'); return; }
+  const selected = [];
+  document.querySelectorAll('#membersList input:checked').forEach(cb => selected.push(parseInt(cb.value)));
+  if (selected.length === 0) { alert('Selecione pelo menos um membro'); return; }
+  const members = [currentUser.id, ...selected];
+  try {
+    const body = { name, members, created_by: currentUser.id };
+    if (groupPhotoData) body.photo = groupPhotoData;
+    const res = await fetch(`${API_URL}/groups`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify(body) });
+    if (res.ok) {
+      alert('✅ Grupo criado!');
+      closeGroupModal();
+      await loadGroups();
+      showGroups();
+    }
+    else alert('❌ Erro ao criar grupo');
+  } catch (error) { console.error(error); alert('Erro ao criar grupo'); }
+}
+
+async function viewMembers() {
+  closeDropdownMenu();
+  if (!selectedGroup) { alert('Selecione um grupo primeiro!'); return; }
+  try {
+    const res = await fetch(`${API_URL}/groups/${selectedGroup.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+    currentGroupData = await res.json();
+    const container = document.getElementById('groupMembersList');
+    container.innerHTML = '';
+    const isAdmin = currentGroupData.created_by === currentUser.id;
+    
+    currentGroupData.members.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'member-item';
+      div.innerHTML = `
+        <div class="avatar" style="width:35px;height:35px;font-size:16px">${m.photo ? `<img src="${m.photo}">` : m.username.charAt(0).toUpperCase()}</div>
+        <div style="flex:1">
+          <strong>${escapeHtml(m.username)}</strong>
+          ${m.id === currentGroupData.created_by ? '<span class="admin-badge">👑 Admin</span>' : ''}
+        </div>
+        ${isAdmin && m.id !== currentUser.id ? `<button class="user-action-btn" onclick="removeMemberFromGroup(${selectedGroup.id}, ${m.id}, '${escapeHtml(m.username)}')">❌ Remover</button>` : ''}
+      `;
+      container.appendChild(div);
+    });
+    document.getElementById('membersModal').style.display = 'flex';
+  } catch (error) { 
+    console.error(error);
+    alert('Erro ao carregar membros'); 
+  }
+}
+
+async function removeMemberFromGroup(groupId, userId, username) {
+  if (!confirm(`Tem certeza que deseja remover "${username}" do grupo?`)) return;
+  try {
+    const response = await fetch(`${API_URL}/groups/${groupId}/members/${userId}`, { 
+      method: 'DELETE', 
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+    });
+    if (response.ok) {
+      alert(`✅ ${username} foi removido do grupo!`);
+      closeMembersModal();
+      await viewMembers();
+      await loadGroups();
+      if (selectedGroup && selectedGroup.id === groupId) {
+        await selectGroup(selectedGroup);
+      }
+    } else {
+      alert('❌ Erro ao remover membro');
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('❌ Erro ao remover membro');
+  }
+}
+
+function closeMembersModal() { document.getElementById('membersModal').style.display = 'none'; }
+
+async function addMemberToGroup() {
+  closeDropdownMenu();
+  if (!selectedGroup) { alert('Selecione um grupo primeiro!'); return; }
+  
+  const groupCheck = await fetch(`${API_URL}/groups/${selectedGroup.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const groupData = await groupCheck.json();
+  if (groupData.created_by !== currentUser.id) {
+    alert('⚠️ Apenas o administrador pode adicionar membros!');
+    return;
+  }
+  
+  const res = await fetch(`${API_URL}/groups/${selectedGroup.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const groupInfo = await res.json();
+  const currentIds = groupInfo.members.map(m => m.id);
+  const available = users.filter(u => !currentIds.includes(u.id) && u.username !== 'teste_direto');
+  const container = document.getElementById('addMembersList');
+  container.innerHTML = '';
+  if (available.length === 0) { container.innerHTML = '<div class="empty">Nenhum usuário disponível</div>'; }
+  else {
+    available.forEach(user => {
+      const div = document.createElement('div');
+      div.className = 'member-item';
+      div.innerHTML = `<input type="checkbox" value="${user.id}" id="add_${user.id}"><label for="add_${user.id}"><div class="avatar" style="width:35px;height:35px;display:inline-block;margin-right:10px">${user.photo ? `<img src="${user.photo}">` : user.username.charAt(0).toUpperCase()}</div><strong>${escapeHtml(user.username)}</strong></label>`;
+      container.appendChild(div);
+    });
+  }
+  document.getElementById('addMemberModal').style.display = 'flex';
+}
+
+function filterAddMembers() {
+  const term = document.getElementById('searchMemberInput').value.toLowerCase();
+  document.querySelectorAll('#addMembersList .member-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+  });
+}
+
+function closeAddMemberModal() { document.getElementById('addMemberModal').style.display = 'none'; document.getElementById('searchMemberInput').value = ''; }
+
+async function confirmAddMembers() {
+  const selected = [];
+  document.querySelectorAll('#addMembersList input:checked').forEach(cb => selected.push(parseInt(cb.value)));
+  if (selected.length === 0) { alert('Selecione pelo menos um membro'); return; }
+  for (const id of selected) {
+    await fetch(`${API_URL}/groups/${selectedGroup.id}/members`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ user_id: id }) });
+  }
+  alert('✅ Membros adicionados!');
+  closeAddMemberModal();
+  await loadGroups();
+  if (selectedGroup) await selectGroup(selectedGroup);
+}
+
+async function leaveGroup() {
+  closeDropdownMenu();
+  if (!selectedGroup) { alert('Selecione um grupo primeiro!'); return; }
+  
+  const res = await fetch(`${API_URL}/groups/${selectedGroup.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const data = await res.json();
+  if (data.created_by === currentUser.id) { 
+    alert('⚠️ Você é o administrador. Se quiser sair, primeiro delete o grupo ou transfira a administração.'); 
+    return; 
+  }
+  if (!confirm(`Sair do grupo "${selectedGroup.name}"?`)) return;
+  await fetch(`${API_URL}/groups/${selectedGroup.id}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ user_id: currentUser.id }) });
+  alert('✅ Você saiu do grupo');
+  selectedGroup = null;
+  await loadGroups();
+  showGroups();
+  closeConversation();
+}
+
+async function deleteConversation() {
+  closeDropdownMenu();
+  if (selectedGroup) {
+    const res = await fetch(`${API_URL}/groups/${selectedGroup.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+    const data = await res.json();
+    if (data.created_by !== currentUser.id) {
+      alert('⚠️ Apenas o administrador pode deletar o grupo!');
+      return;
+    }
+    if (!confirm(`⚠️ Deletar grupo "${selectedGroup.name}"? Todas as mensagens serão perdidas.`)) return;
+    await fetch(`${API_URL}/groups/${selectedGroup.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+    alert('✅ Grupo deletado');
+    selectedGroup = null;
+    await loadGroups();
+    showGroups();
+    closeConversation();
+  } else if (selectedUser) {
+    if (!confirm(`⚠️ Deletar toda conversa com ${selectedUser.username}?`)) return;
+    await fetch(`${API_URL}/messages/conversation/${currentUser.id}/${selectedUser.id}`, { 
+      method: 'DELETE', 
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+    });
+    alert('✅ Conversa deletada');
+    selectedUser = null;
+    await loadUsers();
+    closeConversation();
+    renderUserList();
+  } else { alert('Selecione uma conversa primeiro!'); }
+}
+
+// ========== PERFIL DO USUÁRIO ==========
+async function openUserProfile(userId) {
+  try {
+    const res = await fetch(`${API_URL}/users/${userId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const user = await res.json();
+    document.getElementById('userProfileName').textContent = user.username;
+    document.getElementById('userProfileEmail').textContent = user.email;
+    const avatarDiv = document.getElementById('userProfileAvatar');
+    avatarDiv.innerHTML = user.photo ? `<img src="${user.photo}" style="width:100%;height:100%;object-fit:cover">` : user.username.charAt(0).toUpperCase();
+    document.getElementById('userProfileModal').style.display = 'flex';
+  } catch (error) {
+    alert('Erro ao carregar perfil');
+  }
+}
+
+function closeUserProfile() {
+  document.getElementById('userProfileModal').style.display = 'none';
+}
+
+// ========== MEU PERFIL ==========
+function openMyProfile() {
+  closeDropdownMenu();
+  document.getElementById('profileName').textContent = currentUser.username;
+  document.getElementById('profileEmail').textContent = currentUser.email;
+  const avatarDiv = document.getElementById('profileAvatar');
+  avatarDiv.innerHTML = currentUser.photo ? `<img src="${currentUser.photo}" style="width:100%;height:100%;object-fit:cover">` : currentUser.username.charAt(0).toUpperCase();
+  document.getElementById('profileModal').style.display = 'flex';
+}
+
+function closeProfile() { document.getElementById('profileModal').style.display = 'none'; }
+function uploadProfilePhoto() { document.getElementById('profilePhotoInput').click(); }
+async function updateProfilePhoto() {
+  const file = document.getElementById('profilePhotoInput').files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('photo', file);
+  formData.append('user_id', currentUser.id);
+  const res = await fetch(`${API_URL}/users/photo`, { method: 'PUT', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: formData });
+  if (res.ok) {
+    const result = await res.json();
+    currentUser.photo = result.photo;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    alert('✅ Foto atualizada');
+    closeProfile();
+  }
+}
+async function removeProfilePhoto() {
+  if (!confirm('Remover foto?')) return;
+  await fetch(`${API_URL}/users/photo`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: currentUser.id }) });
+  currentUser.photo = null;
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  alert('✅ Foto removida');
+  closeProfile();
+}
+
+// ========== FOTO DO GRUPO ==========
+function openEditGroupPhoto() {
+  if (!selectedGroup) { alert('Selecione um grupo primeiro!'); return; }
+  const avatarDiv = document.getElementById('editGroupAvatar');
+  avatarDiv.innerHTML = selectedGroup.photo ? `<img src="${selectedGroup.photo}" style="width:100%;height:100%;object-fit:cover">` : '👥';
+  document.getElementById('editGroupPhotoModal').style.display = 'flex';
+}
+
+function closeEditGroupPhotoModal() { document.getElementById('editGroupPhotoModal').style.display = 'none'; tempGroupPhoto = null; }
+function uploadEditGroupPhoto() { document.getElementById('editGroupPhotoInput').click(); }
+function updateGroupPhoto() {
+  const file = document.getElementById('editGroupPhotoInput').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => { tempGroupPhoto = e.target.result; document.getElementById('editGroupAvatar').innerHTML = `<img src="${tempGroupPhoto}" style="width:100%;height:100%;object-fit:cover">`; };
+    reader.readAsDataURL(file);
+  }
+}
+async function saveGroupPhoto() {
+  if (!selectedGroup) return;
+  await fetch(`${API_URL}/groups/${selectedGroup.id}/photo`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ photo: tempGroupPhoto || null }) });
+  selectedGroup.photo = tempGroupPhoto || null;
+  if (selectedGroup) updateConversationHeader(selectedGroup.name, selectedGroup.photo);
+  alert('✅ Foto atualizada');
+  closeEditGroupPhotoModal();
+  await loadGroups();
+}
+function removeGroupPhoto() { tempGroupPhoto = null; document.getElementById('editGroupAvatar').innerHTML = '👥'; }
+
+// ========== UPLOAD ARQUIVO ==========
+async function sendFile() {
+  const input = document.getElementById('fileInput');
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { alert('Máximo 10MB'); input.value = ''; return; }
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('sender_id', currentUser.id);
+  if (selectedGroup) formData.append('group_id', selectedGroup.id);
+  else if (selectedUser) formData.append('receiver_id', selectedUser.id);
+  else { alert('Selecione uma conversa'); return; }
+  const btn = document.querySelector('.sendBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '📤 Enviando...';
+  const res = await fetch(`${API_URL}/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: formData });
+  if (res.ok) {
+    input.value = '';
+    if (selectedGroup) await loadGroupMessages(selectedGroup.id);
+    else if (selectedUser) await loadMessages();
+  } else alert('Erro ao enviar');
+  btn.disabled = false;
+  btn.textContent = original;
+}
+
+// ========== AUTENTICAÇÃO ==========
+async function checkAuth() {
+  const token = localStorage.getItem('token');
+  const saved = localStorage.getItem('currentUser');
+  if (!token || !saved) { window.location.href = 'login.html'; return; }
+  currentUser = JSON.parse(saved);
+  initNotifications();
+  await loadUsers();
+  await loadGroups();
+  initSocket();
+}
+
+function initSocket() {
+  socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], reconnection: true });
+  socket.on('connect', () => {
+    console.log('✅ Socket conectado');
+    if (selectedUser) {
+      const room = `user_${currentUser.id}_${selectedUser.id}`;
+      socket.emit('joinRoom', room);
+    }
+    if (selectedGroup) {
+      socket.emit('joinGroup', selectedGroup.id);
+    }
+  });
+  socket.on('nova_mensagem', msg => {
+    console.log('📨 Mensagem recebida:', msg);
+    if (selectedUser && (msg.sender_id === selectedUser.id || msg.receiver_id === selectedUser.id)) {
+      loadMessages();
+    }
+    if (msg.sender_id !== currentUser.id) {
+      playNotificationSound();
+      const sender = users.find(u => u.id === msg.sender_id);
+      if (sender) showBrowserNotification(sender.username, msg.message);
+      startBlinkingTitle();
+      addUnreadBadge(msg.sender_id);
+    }
+  });
+  socket.on('nova_mensagem_grupo', msg => {
+    console.log('👥 Mensagem de grupo recebida:', msg);
+    if (selectedGroup && msg.group_id === selectedGroup.id) {
+      loadGroupMessages(selectedGroup.id);
+    }
+    if (msg.sender_id !== currentUser.id) {
+      playNotificationSound();
+      startBlinkingTitle();
+    }
+  });
+}
+
+async function loadUsers() {
+  const res = await fetch(`${API_URL}/users`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const all = await res.json();
+  users = all.filter(u => u.id !== currentUser.id && u.username !== 'teste_direto');
+  renderUserList();
+}
+
+async function loadGroups() {
+  const res = await fetch(`${API_URL}/users/${currentUser.id}/groups`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  if (res.ok) {
+    const allGroups = await res.json();
+    groups = [];
+    const groupIds = new Set();
+    for (let g of allGroups) {
+      if (!groupIds.has(g.id)) {
+        groupIds.add(g.id);
+        const mr = await fetch(`${API_URL}/groups/${g.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        if (mr.ok) { const d = await mr.json(); g.total_members = d.members ? d.members.length : 0; g.created_by = d.created_by; }
+        groups.push(g);
+      }
+    }
+  }
+}
+
+function renderUserList() {
+  const container = document.getElementById('userList');
+  container.innerHTML = '';
+  users.forEach(user => {
+    const div = document.createElement('div');
+    div.className = 'user';
+    div.setAttribute('data-user-id', user.id);
+    div.onclick = () => selectUser(user);
+    div.innerHTML = `<div class="avatar">${user.photo ? `<img src="${user.photo}">` : user.username.charAt(0).toUpperCase()}</div><span>${escapeHtml(user.username)}</span><div class="user-actions"><button class="user-action-btn" onclick="event.stopPropagation(); deleteChat('${user.id}')">🗑️</button></div>`;
+    container.appendChild(div);
+  });
+}
+
+async function selectUser(user) {
+  selectedUser = user;
+  selectedGroup = null;
+  clearUnreadBadge(user.id);
+  stopBlinkingTitle();
+  updateConversationHeader(user.username, user.photo);
+  if (socket && socket.connected) {
+    const room = `user_${currentUser.id}_${user.id}`;
+    socket.emit('joinRoom', room);
+  }
+  openConversation();
+  await loadMessages();
+}
+
+async function loadMessages() {
+  if (!selectedUser) return;
+  const res = await fetch(`${API_URL}/messages/${currentUser.id}/${selectedUser.id}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const messages = await res.json();
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  if (messages.length === 0) {
+    container.innerHTML = '<div class="empty"><h1>💬</h1><p>Nenhuma mensagem ainda. Envie uma mensagem!</p></div>';
+    return;
+  }
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `message ${msg.sender_id === currentUser.id ? 'me' : 'other'}`;
+    div.setAttribute('data-message-id', msg.id);
+    div.oncontextmenu = (e) => showContextMenu(e, msg.id, msg);
+    let content = '';
+    if (msg.is_deleted) {
+      content = '<i>Mensagem apagada</i>';
+      div.classList.add('message-deleted');
+    } else {
+      if (msg.file_url) {
+        if (msg.file_type && msg.file_type.startsWith('image/')) content += `<img src="${msg.file_url}" style="max-width:150px;border-radius:8px;cursor:pointer" onclick="window.open('${msg.file_url}','_blank')">`;
+        else content += `<div class="file-message"><a href="${msg.file_url}" target="_blank">📎 ${msg.file_name || 'Arquivo'}</a></div>`;
+      }
+      if (msg.message && !msg.message.startsWith('📎')) content += escapeHtml(msg.message);
+      content += `<small>${new Date(msg.created_at).toLocaleTimeString()}</small>`;
+    }
+    div.innerHTML = content;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+async function selectGroup(group) {
+  selectedGroup = group;
+  selectedUser = null;
+  stopBlinkingTitle();
+  updateConversationHeader(group.name, group.photo);
+  if (socket && socket.connected) {
+    socket.emit('joinGroup', group.id);
+  }
+  openConversation();
+  await loadGroupMessages(group.id);
+}
+
+async function loadGroupMessages(groupId) {
+  const res = await fetch(`${API_URL}/groups/${groupId}/messages`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const messages = await res.json();
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  if (messages.length === 0) {
+    container.innerHTML = '<div class="empty"><h1>💬</h1><p>Nenhuma mensagem ainda. Seja o primeiro a enviar!</p></div>';
+    return;
+  }
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `message ${msg.sender_id === currentUser.id ? 'me' : 'other'}`;
+    div.setAttribute('data-message-id', msg.id);
+    div.oncontextmenu = (e) => showContextMenu(e, msg.id, msg);
+    let content = '';
+    if (msg.is_deleted) {
+      content = '<i>Mensagem apagada</i>';
+      div.classList.add('message-deleted');
+    } else {
+      if (msg.sender_id !== currentUser.id) content = `<b>${escapeHtml(msg.sender_name || 'Usuário')}</b><br>`;
+      if (msg.file_url) {
+        if (msg.file_type && msg.file_type.startsWith('image/')) content += `<img src="${msg.file_url}" style="max-width:150px;border-radius:8px;cursor:pointer" onclick="window.open('${msg.file_url}','_blank')">`;
+        else content += `<div class="file-message"><a href="${msg.file_url}" target="_blank">📎 ${msg.file_name || 'Arquivo'}</a></div>`;
+      }
+      if (msg.message && !msg.message.startsWith('📎')) content += escapeHtml(msg.message);
+      content += `<small>${new Date(msg.created_at).toLocaleTimeString()}</small>`;
+    }
+    div.innerHTML = content;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+async function deleteGroupChat(groupId) {
+  const res = await fetch(`${API_URL}/groups/${groupId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  const data = await res.json();
+  if (data.created_by !== currentUser.id) {
+    alert('⚠️ Apenas o administrador pode deletar o grupo!');
+    return;
+  }
+  if (!confirm('Deletar grupo?')) return;
+  await fetch(`${API_URL}/groups/${groupId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  if (selectedGroup?.id === groupId) { selectedGroup = null; closeConversation(); }
+  await loadGroups();
+  showGroups();
+}
+
+function showChats() {
+  document.getElementById('chatTab').classList.add('active');
+  document.getElementById('groupTab').classList.remove('active');
+  renderUserList();
+}
+
+function showGroups() {
+  document.getElementById('chatTab').classList.remove('active');
+  document.getElementById('groupTab').classList.add('active');
+  const container = document.getElementById('userList');
+  container.innerHTML = '';
+  const uniqueGroups = [];
+  const groupIds = new Set();
+  for (let group of groups) {
+    if (!groupIds.has(group.id)) {
+      groupIds.add(group.id);
+      uniqueGroups.push(group);
+    }
+  }
+  if (uniqueGroups.length === 0) {
+    container.innerHTML = '<div class="empty">📭 Nenhum grupo encontrado.<br>👥 Clique no botão 👥 para criar um novo grupo!</div>';
+    return;
+  }
+  uniqueGroups.forEach(group => {
+    const div = document.createElement('div');
+    div.className = 'user';
+    div.onclick = () => selectGroup(group);
+    div.innerHTML = `<div class="avatar">${group.photo ? `<img src="${group.photo}">` : '👥'}</div><div style="flex:1"><strong>${escapeHtml(group.name)}</strong><br><small>👥 ${group.total_members || 0} membros</small>${group.created_by === currentUser.id ? '<br><small style="color:#fbbf24;">👑 Admin</small>' : ''}</div><div class="user-actions"><button class="user-action-btn" onclick="event.stopPropagation(); deleteGroupChat(${group.id})">🗑️</button></div>`;
+    container.appendChild(div);
+  });
+}
+
+async function deleteChat(userId) {
+  if (!confirm('Deletar toda conversa?')) return;
+  await fetch(`${API_URL}/messages/conversation/${currentUser.id}/${userId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+  if (selectedUser?.id == userId) { selectedUser = null; closeConversation(); }
+  await loadUsers();
+  renderUserList();
+}
+
+function logout() {
+  if (confirm('Sair da conta?')) { localStorage.clear(); if (socket) socket.disconnect(); window.location.href = 'login.html'; }
+}
+
+function openEditChatPhoto() {
+  if (selectedGroup) openEditGroupPhoto();
+  else if (selectedUser) openUserProfile(selectedUser.id);
+}
+
+function openChatInfo() {
+  if (selectedGroup) viewMembers();
+  else if (selectedUser) openUserProfile(selectedUser.id);
+}
+
+function openEditUserPhoto() {}
+function uploadEditGroupPhoto() {}
+function updateGroupPhoto() {}
+function removeGroupPhoto() {}
+function closeEditGroupPhotoModal() {}
+
+document.getElementById('msgInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+window.addEventListener('focus', () => stopBlinkingTitle());
+
+checkAuth();
+</script>
+</body>
+</html>

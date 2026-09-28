@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatApp</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+  }
+
+  .container {
+    width: 90%;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 60px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+
+  .logo {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+  }
+
+  h1 {
+    font-size: 48px;
+    color: white;
+    font-weight: bold;
+  }
+
+  h1 span {
+    color: #3b82f6;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: #cbd5e1;
+    font-size: 16px;
+  }
+
+  .content {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    text-align: left;
+  }
+
+  .box {
+    background: rgba(255,255,255,0.03);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .box h2 {
+    color: #60a5fa;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .box p {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .btn {
+    margin-top: 40px;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    transition: 0.2s;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59,130,246,0.4);
+  }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  @media (max-width: 768px) {
+    .content {
+      grid-template-columns: 1fr;
+    }
+
+    .container {
+      padding: 40px 25px;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="logo">💬</div>
+
+  <h1>Chat<span>Time</span></h1>
+
+  <p class="subtitle">
+    Conecta-te e conversa em tempo real com os teus amigos
+  </p>
+
+  <div class="content">
+
+    <div class="box">
+      <h2>📌 O que é o ChatTime?</h2>
+      <p>
+        Uma aplicação de mensagens em tempo real que permite conversar com amigos de forma rápida, simples e moderna.
+      </p>
+    </div>
+
+    <div class="box">
+      <h2>🚀 Para que serve?</h2>
+      <p>
+        Serve para comunicação instantânea entre utilizadores, permitindo troca de mensagens em qualquer lugar.
+      </p>
+    </div>
+
+  </div>
+
+  <button class="btn" onclick="entrar()">Entrar no Chat</button>
+
+  <div class="footer">
+    ChatTime © 2026 • Versão 1.0
+  </div>
+
+</div>
+
+<script>
+function entrar(){
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login e Cadastro</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  font-family:'Segoe UI',sans-serif;
+}
+
+.container{
+  width:400px;
+  background:rgba(17,24,39,0.95);
+  backdrop-filter:blur(15px);
+  padding:40px;
+  border-radius:25px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+}
+
+.logo{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.logo h1{
+  color:white;
+  font-size:34px;
+}
+
+.logo p{
+  color:#94a3b8;
+  margin-top:5px;
+}
+
+form{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+input{
+  width:100%;
+  padding:16px;
+  border:none;
+  outline:none;
+  border-radius:14px;
+  background:#1e293b;
+  color:white;
+  font-size:15px;
+}
+
+input:focus{
+  background:#334155;
+  box-shadow:0 0 0 2px #3b82f6;
+}
+
+button{
+  padding:16px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#06b6d4,#3b82f6);
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  transform:scale(1.03);
+  opacity:0.95;
+}
+
+.links{
+  margin-top:20px;
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+}
+
+.links a{
+  color:#60a5fa;
+  text-decoration:none;
+  cursor:pointer;
+}
+
+.hidden{
+  display:none;
+}
+
+.alert{
+  margin-bottom:15px;
+  padding:12px;
+  border-radius:12px;
+  font-size:14px;
+  text-align:center;
+}
+
+.success{
+  background:#14532d;
+  color:#86efac;
+}
+
+.error{
+  background:#7f1d1d;
+  color:#fca5a5;
+}
+
+.info{
+  background:#1e3a5f;
+  color:#93c5fd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="logo">
+    <h1>💬 ChatTime</h1>
+    <p>Entre na sua conta</p>
+  </div>
+
+  <div id="alertBox"></div>
+
+  <!-- LOGIN -->
+  <form id="loginForm">
+    <input type="email" id="loginEmail" placeholder="Seu email">
+    <input type="password" id="loginPassword" placeholder="Sua senha">
+    <button type="submit">Entrar</button>
+    <div class="links">
+      <a onclick="showRegister()">Criar conta</a>
+      <a onclick="showForgot()">Esqueci a senha</a>
+    </div>
+  </form>
+
+  <!-- CADASTRO -->
+  <form id="registerForm" class="hidden">
+    <input type="text" id="registerUsername" placeholder="Nome de usuário">
+    <input type="email" id="registerEmail" placeholder="Seu email">
+    <input type="password" id="registerPassword" placeholder="Crie uma senha">
+    <button type="submit">Criar Conta</button>
+    <div class="links">
+      <a onclick="showLogin()">Já tenho conta</a>
+    </div>
+  </form>
+
+  <!-- VERIFICAÇÃO DE CADASTRO -->
+  <form id="verifyForm" class="hidden">
+    <input type="text" id="verificationCode" placeholder="Código de 6 dígitos" maxlength="6">
+    <button type="button" id="verifyBtn">Verificar e Criar Conta</button>
+    <div class="links">
+      <a onclick="showRegister()">Voltar</a>
+    </div>
+  </form>
+
+  <!-- ESQUECI SENHA - ENVIAR EMAIL -->
+  <form id="forgotForm" class="hidden">
+    <input type="email" id="forgotEmail" placeholder="Digite seu email">
+    <button type="submit">Enviar Código</button>
+    <div class="links">
+      <a onclick="showLogin()">Voltar</a>
+    </div>
+  </form>
+
+  <!-- VERIFICAÇÃO DE RECUPERAÇÃO -->
+  <form id="verifyResetForm" class="hidden">
+    <input type="text" id="resetCode" placeholder="Código de 6 dígitos" maxlength="6">
+    <button type="button" id="verifyResetBtn">Verificar Código</button>
+    <div class="links">
+      <a onclick="showForgot()">Voltar</a>
+    </div>
+  </form>
+
+  <!-- REDEFINIR SENHA -->
+  <form id="resetForm" class="hidden">
+    <input type="password" id="newPassword" placeholder="Nova senha (mínimo 6 caracteres)">
+    <input type="password" id="confirmPassword" placeholder="Confirmar nova senha">
+    <button type="submit">Redefinir Senha</button>
+    <div class="links">
+      <a onclick="showLogin()">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+// URL do servidor - USE O LINK DO NGROK AQUI
+const SERVER_URL = 'https://unfixable-quicksand-sprawl.ngrok-free.dev';
+const API_URL = SERVER_URL + '/api';
+
+let tempUserData = null;
+let resetEmail = null;
+let verifiedResetCode = null;
+
+function showAlert(msg, type) {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.innerHTML = `<div class="alert ${type}">${msg}</div>`;
+  setTimeout(() => alertBox.innerHTML = "", 5000);
+}
+
+function showLogin() {
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('verifyForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.getElementById('verifyResetForm').classList.add('hidden');
+  document.getElementById('resetForm').classList.add('hidden');
+  document.querySelector('.logo p').textContent = "Entre na sua conta";
+}
+
+function showRegister() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.remove('hidden');
+  document.getElementById('verifyForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.getElementById('verifyResetForm').classList.add('hidden');
+  document.getElementById('resetForm').classList.add('hidden');
+  document.querySelector('.logo p').textContent = "Crie sua conta";
+}
+
+function showVerify() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('verifyForm').classList.remove('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.getElementById('verifyResetForm').classList.add('hidden');
+  document.getElementById('resetForm').classList.add('hidden');
+  document.querySelector('.logo p').textContent = "Digite o código de verificação";
+}
+
+function showForgot() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('verifyForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.remove('hidden');
+  document.getElementById('verifyResetForm').classList.add('hidden');
+  document.getElementById('resetForm').classList.add('hidden');
+  document.querySelector('.logo p').textContent = "Recuperar senha";
+}
+
+function showVerifyReset() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('verifyForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.getElementById('verifyResetForm').classList.remove('hidden');
+  document.getElementById('resetForm').classList.add('hidden');
+  document.querySelector('.logo p').textContent = "Digite o código de recuperação";
+}
+
+function showResetPassword() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('verifyForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.getElementById('verifyResetForm').classList.add('hidden');
+  document.getElementById('resetForm').classList.remove('hidden');
+  document.querySelector('.logo p').textContent = "Digite sua nova senha";
+}
+
+// ========== CADASTRO ==========
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const username = document.getElementById('registerUsername').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value.trim();
+  
+  if (!username || !email || !password) {
+    showAlert('Preencha todos os campos', 'error');
+    return;
+  }
+  
+  if (password.length < 6) {
+    showAlert('A senha deve ter pelo menos 6 caracteres', 'error');
+    return;
+  }
+  
+  tempUserData = { username, email, password };
+  
+  try {
+    showAlert('Enviando código de verificação...', 'info');
+    
+    const response = await fetch(`${API_URL}/auth/send-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showAlert('Código enviado! Verifique seu email ou o terminal do servidor.', 'success');
+      showVerify();
+    } else {
+      showAlert(data.message || 'Erro ao enviar código', 'error');
+    }
+  } catch (error) {
+    showAlert('Erro de conexão', 'error');
+  }
+});
+
+document.getElementById('verifyBtn').addEventListener('click', async () => {
+  const code = document.getElementById('verificationCode').value.trim();
+  
+  if (!code || code.length !== 6) {
+    showAlert('Digite o código de 6 dígitos', 'error');
+    return;
+  }
+  
+  if (!tempUserData) {
+    showAlert('Dados do usuário não encontrados', 'error');
+    showRegister();
+    return;
+  }
+  
+  try {
+    showAlert('Verificando código...', 'info');
+    
+    const verifyRes = await fetch(`${API_URL}/auth/verify-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email: tempUserData.email, 
+        code: code 
+      })
+    });
+    
+    if (!verifyRes.ok) {
+      const err = await verifyRes.json();
+      showAlert(err.message || 'Código inválido', 'error');
+      return;
+    }
+    
+    showAlert('Código válido! Criando conta...', 'info');
+    
+    const registerRes = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        username: tempUserData.username, 
+        email: tempUserData.email, 
+        password: tempUserData.password 
+      })
+    });
+    
+    const registerData = await registerRes.json();
+    
+    if (registerRes.ok) {
+      showAlert('✅ CONTA CRIADA COM SUCESSO! Faça login.', 'success');
+      
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('verificationCode').value = '';
+      document.getElementById('loginEmail').value = tempUserData.email;
+      
+      tempUserData = null;
+      
+      setTimeout(() => {
+        showLogin();
+      }, 3000);
+    } else {
+      showAlert(registerData.message || 'Erro ao criar conta', 'error');
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    showAlert('Erro de conexão', 'error');
+  }
+});
+
+// ========== RECUPERAÇÃO DE SENHA ==========
+document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('forgotEmail').value.trim();
+  
+  if (!email) {
+    showAlert('Digite seu email', 'error');
+    return;
+  }
+  
+  resetEmail = email;
+  
+  try {
+    showAlert('Enviando código de recuperação...', 'info');
+    
+    const response = await fetch(`${API_URL}/auth/send-reset-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showAlert('Código enviado! Verifique seu email ou o terminal.', 'success');
+      showVerifyReset();
+    } else {
+      showAlert(data.message || 'Email não encontrado', 'error');
+    }
+  } catch (error) {
+    showAlert('Erro de conexão', 'error');
+  }
+});
+
+document.getElementById('verifyResetBtn').addEventListener('click', async () => {
+  const code = document.getElementById('resetCode').value.trim();
+  
+  if (!code || code.length !== 6) {
+    showAlert('Digite o código de 6 dígitos', 'error');
+    return;
+  }
+  
+  try {
+    showAlert('Verificando código...', 'info');
+    
+    const response = await fetch(`${API_URL}/auth/verify-reset-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email: resetEmail, 
+        code: code 
+      })
+    });
+    
+    if (response.ok) {
+      verifiedResetCode = code;
+      showAlert('✅ Código verificado! Agora digite sua nova senha.', 'success');
+      showResetPassword();
+    } else {
+      const err = await response.json();
+      showAlert(err.message || 'Código inválido ou expirado', 'error');
+    }
+  } catch (error) {
+    showAlert('Erro de conexão', 'error');
+  }
+});
+
+document.getElementById('resetForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const newPassword = document.getElementById('newPassword').value.trim();
+  const confirmPassword = document.getElementById('confirmPassword').value.trim();
+  
+  if (!newPassword || !confirmPassword) {
+    showAlert('Preencha todos os campos', 'error');
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    showAlert('A senha deve ter pelo menos 6 caracteres', 'error');
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    showAlert('As senhas não coincidem', 'error');
+    return;
+  }
+  
+  if (!verifiedResetCode) {
+    showAlert('Código não verificado. Solicite um novo código.', 'error');
+    showForgot();
+    return;
+  }
+  
+  try {
+    showAlert('Alterando senha...', 'info');
+    
+    const response = await fetch(`${API_URL}/auth/reset-password-with-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email: resetEmail, 
+        newPassword: newPassword,
+        code: verifiedResetCode
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showAlert('✅ SENHA ALTERADA COM SUCESSO! Faça login.', 'success');
+      
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('resetCode').value = '';
+      document.getElementById('loginEmail').value = resetEmail;
+      
+      verifiedResetCode = null;
+      resetEmail = null;
+      
+      setTimeout(() => {
+        showLogin();
+      }, 3000);
+    } else {
+      showAlert(data.message || 'Erro ao alterar senha', 'error');
+    }
+  } catch (error) {
+    showAlert('Erro de conexão', 'error');
+  }
+});
+
+// ========== LOGIN ==========
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  
+  if (!email || !password) {
+    showAlert('Preencha todos os campos', 'error');
+    return;
+  }
+  
+  try {
+    showAlert('Verificando...', 'info');
+    
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      showAlert('✅ Login realizado! Redirecionando...', 'success');
+      setTimeout(() => {
+        window.location.href = 'chat.html';
+      }, 1500);
+    } else {
+      showAlert(data.message || 'Email ou senha incorretos', 'error');
+    }
+  } catch (error) {
+    showAlert('Erro de conexão', 'error');
+  }
+});
+</script>
+
+</body>
+</html>
