@@ -25,7 +25,9 @@ Sistema de mensagens instantâneas desenvolvido com Node.js e Socket.io, com aut
 - Serviço de notificações por email
 - Base de dados de utilizadores e mensagens
 
-**Como me encontrar**
+**Como me encontrar:**
 [LinkedIn](https://www.linkedin.com/in/chelton-elias-samuel-07b13b409)
+
 Email: cheltoneliasssamuel043@gmail.com
+
   Contacto: 879983536 / 843983536
